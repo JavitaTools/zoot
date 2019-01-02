@@ -61,6 +61,7 @@ import com.minexd.zoot.rank.command.RankSetWeightCommand;
 import com.minexd.zoot.rank.command.RankUninheritCommand;
 import com.minexd.zoot.rank.command.RanksCommand;
 import com.minexd.zoot.util.CC;
+import com.minexd.zoot.util.adapter.ChatColorTypeAdapter;
 import com.minexd.zoot.util.duration.Duration;
 import com.minexd.zoot.util.duration.DurationTypeAdapter;
 import com.minexd.zoot.util.menu.MenuListener;
@@ -79,6 +80,7 @@ import java.util.logging.Level;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -112,7 +114,7 @@ public class Zoot extends JavaPlugin {
 
 		mainConfig = new BasicConfigurationFile(this, "config");
 
-		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 2).check();
+		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 3).check();
 
 		loadMongo();
 		loadRedis();
@@ -182,6 +184,7 @@ public class Zoot extends JavaPlugin {
 		honcho.registerTypeAdapter(Rank.class, new RankTypeAdapter());
 		honcho.registerTypeAdapter(Profile.class, new ProfileTypeAdapter());
 		honcho.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
+		honcho.registerTypeAdapter(ChatColor.class, new ChatColorTypeAdapter());
 
 		pidgin = new Pidgin("zoot",
 				mainConfig.getString("REDIS.HOST"),

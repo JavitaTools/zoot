@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.minexd.zoot.Zoot;
+import com.minexd.zoot.ZootAPI;
 import com.minexd.zoot.profile.conversation.ProfileConversations;
 import com.minexd.zoot.profile.grant.event.GrantAppliedEvent;
 import com.minexd.zoot.profile.grant.event.GrantExpireEvent;
@@ -177,12 +178,13 @@ public class Profile {
 		player.recalculatePermissions();
 
 		String displayName = activeGrant.getRank().getPrefix() + player.getName() + activeGrant.getRank().getSuffix();
+		String coloredName = ZootAPI.getColoredName(player);
 
 		player.setDisplayName(displayName);
 
-//		if (Zoot.get().getMainConfig().getBoolean("SETTINGS.UPDATE_PLAYER_LIST_NAME")) {
-//			player.setPlayerListName(displayName);
-//		}
+		if (Zoot.get().getMainConfig().getBoolean("SETTINGS.UPDATE_PLAYER_LIST_NAME")) {
+			player.setPlayerListName(coloredName);
+		}
 	}
 
 	public void load() {

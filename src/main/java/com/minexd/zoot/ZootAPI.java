@@ -22,4 +22,9 @@ public class ZootAPI {
 		return profile == null ? Rank.getDefaultRank() : profile.getActiveRank();
 	}
 
+	public static boolean isInStaffMode(Player player) {
+		Profile profile = Profile.getProfiles().get(player.getUniqueId());
+		return profile != null && player.hasPermission("zoot.staff") && profile.getStaffOptions().staffModeEnabled();
+	}
+
 }

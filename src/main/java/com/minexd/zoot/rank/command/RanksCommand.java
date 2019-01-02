@@ -2,6 +2,9 @@ package com.minexd.zoot.rank.command;
 
 import com.minexd.zoot.rank.Rank;
 import com.qrakn.honcho.command.CommandMeta;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -9,9 +12,17 @@ import org.bukkit.command.CommandSender;
 public class RanksCommand {
 
 	public void execute(CommandSender sender) {
+		List<Rank> ranks = new ArrayList<>(Rank.getRanks().values());
+		ranks.sort(new Comparator<Rank>() {
+			@Override
+			public int compare(Rank o1, Rank o2) {
+				return o2.getWeight() - o1.getWeight();
+			}
+		});
+
 		sender.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "Ranks");
 
-		for (Rank rank : Rank.getRanks().values()) {
+		for (Rank rank : ranks) {
 			sender.sendMessage(ChatColor.GRAY + " - " + ChatColor.RESET + rank.getColor() + rank.getDisplayName() +
 			                   ChatColor.RESET +  " (Weight: " + rank.getWeight() + ")");
 		}
