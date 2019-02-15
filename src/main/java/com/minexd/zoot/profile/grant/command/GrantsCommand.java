@@ -7,7 +7,7 @@ import com.qrakn.honcho.command.CPL;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "grants", async = true, permission = "zoot.staff.grant")
+@CommandMeta(label = "grants", async = true, permission = "zoot.grants.show")
 public class GrantsCommand {
 
 	public void execute(Player player, @CPL("player") Profile profile) {

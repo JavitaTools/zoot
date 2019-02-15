@@ -13,13 +13,18 @@ import com.minexd.zoot.network.packet.PacketRefreshRank;
 import com.minexd.zoot.network.packet.PacketStaffChat;
 import com.minexd.zoot.network.packet.PacketStaffJoinNetwork;
 import com.minexd.zoot.network.packet.PacketStaffLeaveNetwork;
+import com.minexd.zoot.network.packet.PacketStaffReport;
+import com.minexd.zoot.network.packet.PacketStaffRequest;
 import com.minexd.zoot.network.packet.PacketStaffSwitchServer;
+import com.minexd.zoot.network.packet.PacketClearPunishments;
+import com.minexd.zoot.network.packet.PacketGlobalWhitelistRefresh;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.profile.grant.Grant;
 import com.minexd.zoot.profile.grant.event.GrantAppliedEvent;
 import com.minexd.zoot.profile.grant.event.GrantExpireEvent;
 import com.minexd.zoot.profile.punishment.Punishment;
 import com.minexd.zoot.rank.Rank;
+import java.util.List;
 import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -73,7 +78,7 @@ public class NetworkPacketListener implements PacketListener {
 			profile.getPunishments().removeIf(other -> Objects.equals(other, punishment));
 			profile.getPunishments().add(punishment);
 
-			if (punishment.getType().isBan()) {
+			if (punishment.getType().isBan() && !punishment.isRemoved() && !punishment.hasExpired()) {
 				new BukkitRunnable() {
 					@Override
 					public void run() {
@@ -94,8 +99,7 @@ public class NetworkPacketListener implements PacketListener {
 
 		rank.load();
 
-		Zoot.broadcastOps(Locale.NETWORK_RANK_REFRESHED.format(Locale.NETWORK_BROADCAST_PREFIX.format(),
-				rank.getDisplayName()));
+		Zoot.broadcastOps("&8[&eNetwork&8] &fRefreshed rank " + rank.getDisplayName());
 	}
 
 	@IncomingPacketHandler
@@ -103,8 +107,7 @@ public class NetworkPacketListener implements PacketListener {
 		Rank rank = Rank.getRanks().remove(packet.getUuid());
 
 		if (rank != null) {
-			Zoot.broadcastOps(Locale.NETWORK_RANK_DELETED.format(Locale.NETWORK_BROADCAST_PREFIX.format(),
-					rank.getDisplayName()));
+			Zoot.broadcastOps("&8[&eNetwork&8] &fDeleted rank " + rank.getDisplayName() );
 		}
 	}
 
@@ -121,9 +124,8 @@ public class NetworkPacketListener implements PacketListener {
 			    	Profile profile = Profile.getProfiles().get(event.getPlayer().getUniqueId());
 
 			    	if (profile != null && profile.getStaffOptions().staffModeEnabled()) {
-					    onlinePlayer.sendMessage(Locale.STAFF_CHAT.format(Locale.STAFF_BROADCAST_PREFIX.format(),
-							    packet.getPlayerName(), packet.getServerName(), packet.getChatMessage()
-					    ));
+					    onlinePlayer.sendMessage(Locale.STAFF_CHAT.format(packet.getPlayerName(), packet.getServerName(),
+							    packet.getChatMessage()));
 				    }
 			    }
 		    });
@@ -131,20 +133,87 @@ public class NetworkPacketListener implements PacketListener {
 
 	@IncomingPacketHandler
 	public void onStaffJoinNetwork(PacketStaffJoinNetwork packet) {
-		zoot.getServer().broadcast(Locale.STAFF_JOIN_NETWORK.format(Locale.STAFF_BROADCAST_PREFIX.format(),
-				packet.getPlayerName(), packet.getServerName()), "zoot.staff");
+		zoot.getServer().broadcast(Locale.STAFF_JOIN_NETWORK.format(packet.getPlayerName(), packet.getServerName()),
+				"zoot.staff");
 	}
 
 	@IncomingPacketHandler
 	public void onStaffLeaveNetwork(PacketStaffLeaveNetwork packet) {
-		zoot.getServer().broadcast(Locale.STAFF_LEAVE_NETWORK.format(Locale.STAFF_BROADCAST_PREFIX.format(),
-				packet.getPlayerName()), "zoot.staff");
+		zoot.getServer().broadcast(Locale.STAFF_LEAVE_NETWORK.format(packet.getPlayerName()), "zoot.staff");
 	}
 
 	@IncomingPacketHandler
 	public void onStaffSwitchServer(PacketStaffSwitchServer packet) {
-		zoot.getServer().broadcast(Locale.STAFF_SWITCH_SERVER.format(Locale.STAFF_BROADCAST_PREFIX.format(),
-				packet.getPlayerName(), packet.getToServerName(), packet.getFromServerName()), "zoot.staff");
+		zoot.getServer().broadcast(Locale.STAFF_SWITCH_SERVER.format(packet.getPlayerName(), packet.getToServerName(),
+				packet.getFromServerName()), "zoot.staff");
+	}
+
+	@IncomingPacketHandler
+	public void onGlobalWhitelistRefresh(PacketGlobalWhitelistRefresh packet) {
+		zoot.getWhitelist().fetchFromRedis();
+
+		String[] details = new String[]{
+				zoot.getWhitelist().isEnabled() ? "Enabled" : "Disabled",
+				zoot.getWhitelist().getMode().getReadable()
+		};
+
+		Zoot.broadcastOps(String.format("&8[&eNetwork&8] &fRefreshed global whitelist (%1$s) (%2$s)", details[0], details[1]));
+	}
+
+	@IncomingPacketHandler
+	public void onStaffReport(PacketStaffReport packet) {
+		List<String> messages = Locale.STAFF_REPORT_BROADCAST.formatLines(packet.getSentBy(), packet.getAccused(),
+				packet.getReason(), packet.getServerId(), packet.getServerName());
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.hasPermission("zoot.staff")) {
+				Profile profile = Profile.getByUuid(player.getUniqueId());
+
+				if (profile.getStaffOptions().staffModeEnabled()) {
+					for (String message : messages) {
+						player.sendMessage(message);
+					}
+				}
+			}
+		}
+	}
+
+	@IncomingPacketHandler
+	public void onStaffRequest(PacketStaffRequest packet) {
+		List<String> messages = Locale.STAFF_REQUEST_BROADCAST.formatLines(packet.getSentBy(), packet.getReason(),
+				packet.getServerId(), packet.getServerName());
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.hasPermission("zoot.staff")) {
+				Profile profile = Profile.getByUuid(player.getUniqueId());
+
+				if (profile.getStaffOptions().staffModeEnabled()) {
+					for (String message : messages) {
+						player.sendMessage(message);
+					}
+				}
+			}
+		}
+	}
+
+	@IncomingPacketHandler
+	public void onClearGrants(PacketClearPunishments packet) {
+		Player player = Bukkit.getPlayer(packet.getUuid());
+
+		if (player != null) {
+			Profile profile = Profile.getByUuid(player.getUniqueId());
+			profile.getGrants().clear();
+		}
+	}
+
+	@IncomingPacketHandler
+	public void onClearPunishments(PacketClearPunishments packet) {
+		Player player = Bukkit.getPlayer(packet.getUuid());
+
+		if (player != null) {
+			Profile profile = Profile.getByUuid(player.getUniqueId());
+			profile.getPunishments().clear();
+		}
 	}
 
 }

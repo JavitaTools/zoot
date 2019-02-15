@@ -35,7 +35,7 @@ public class AltsCommand {
 			StringBuilder builder = new StringBuilder();
 
 			for (Profile altProfile : alts) {
-				builder.append(altProfile.getUsername());
+				builder.append(altProfile.getName());
 				builder.append(", ");
 			}
 

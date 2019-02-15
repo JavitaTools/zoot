@@ -7,7 +7,7 @@ import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = { "gamemode", "gm" }, permission = "zoot.admin.gamemode")
+@CommandMeta(label = { "gamemode", "gm" }, permission = "zoot.gamemode")
 public class GameModeCommand {
 
 	public void execute(Player player, GameMode gameMode) {

@@ -16,7 +16,7 @@ import java.util.UUID;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "grant", async = true, permission = "zoot.staff.grant")
+@CommandMeta(label = "grant", async = true, permission = "zoot.grants.add")
 public class GrantCommand {
 
 	public void execute(CommandSender sender, @CPL("player") Profile profile, Rank rank, Duration duration, String reason) {
@@ -48,7 +48,7 @@ public class GrantCommand {
 
 		sender.sendMessage(CC.GREEN + "You applied a `{rank}` grant to `{player}` for {time-remaining}."
 				.replace("{rank}", rank.getDisplayName())
-				.replace("{player}", profile.getUsername())
+				.replace("{player}", profile.getName())
 				.replace("{time-remaining}", duration.getValue() == Integer.MAX_VALUE ? "forever"
 						: TimeUtil.millisToRoundedTime(duration.getValue())));
 

@@ -4,7 +4,7 @@ import com.minexd.zoot.util.CC;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "more", permission = "zoot.admin.more")
+@CommandMeta(label = "more", permission = "zoot.more")
 public class MoreCommand {
 
 	public void execute(Player player) {

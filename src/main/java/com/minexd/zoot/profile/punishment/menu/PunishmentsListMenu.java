@@ -33,7 +33,7 @@ public class PunishmentsListMenu extends FilterablePaginatedMenu<Punishment> {
 
 	@Override
 	public String getPrePaginatedTitle(Player player) {
-		return "&c" + profile.getUsername() + "'s Punishments (" + getCountOfFilteredPunishments() + ")";
+		return "&c" + profile.getName() + "'s Punishments (" + getCountOfFilteredPunishments() + ")";
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class PunishmentsListMenu extends FilterablePaginatedMenu<Punishment> {
 	public Map<Integer, Button> getGlobalButtons(Player player) {
 		Map<Integer, Button> buttons = super.getGlobalButtons(player);
 
-		if (profile.getUsername() != null) {
+		if (profile.getName() != null) {
 			buttons.put(4, new ProfileMenuControlHeaderButton(profile, redisPlayerData));
 		}
 
@@ -116,7 +116,7 @@ public class PunishmentsListMenu extends FilterablePaginatedMenu<Punishment> {
 			if (punishment.getAddedBy() != null) {
 				try {
 					Profile addedByProfile = Profile.getByUuid(punishment.getAddedBy());
-					addedBy = addedByProfile.getUsername();
+					addedBy = addedByProfile.getName();
 				} catch (Exception e) {
 					addedBy = "Could not fetch...";
 				}
@@ -127,7 +127,7 @@ public class PunishmentsListMenu extends FilterablePaginatedMenu<Punishment> {
 			if (punishment.getRemovedBy() != null) {
 				try {
 					Profile removedByProfile = Profile.getByUuid(punishment.getRemovedBy());
-					removedBy = removedByProfile.getUsername();
+					removedBy = removedByProfile.getName();
 				} catch (Exception e) {
 					removedBy = "Could not fetch...";
 				}

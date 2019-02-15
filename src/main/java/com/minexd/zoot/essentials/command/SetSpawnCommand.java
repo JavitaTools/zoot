@@ -5,7 +5,7 @@ import com.minexd.zoot.util.CC;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "setspawn", permission = "zoot.admin.setspawn")
+@CommandMeta(label = "setspawn", permission = "zoot.setspawn")
 public class SetSpawnCommand {
 
 	public void execute(Player player) {

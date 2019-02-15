@@ -23,6 +23,7 @@ public class RankSetWeightCommand {
 
 		rank.setWeight(Integer.parseInt(weight));
 		rank.save();
+		rank.refresh();
 
 		sender.sendMessage(CC.GREEN + "You updated the rank's weight.");
 	}

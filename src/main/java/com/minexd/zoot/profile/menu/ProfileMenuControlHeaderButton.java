@@ -23,7 +23,7 @@ public class ProfileMenuControlHeaderButton extends Button {
 	public ItemStack getButtonItem(Player player) {
 		ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
-		skullMeta.setOwner(profile.getUsername());
+		skullMeta.setOwner(profile.getName());
 		itemStack.setItemMeta(skullMeta);
 
 		List<String> lore = new ArrayList<>();
@@ -45,7 +45,7 @@ public class ProfileMenuControlHeaderButton extends Button {
 		lore.add(CC.MENU_BAR);
 
 		return new ItemBuilder(itemStack)
-				.name("&3" + profile.getUsername())
+				.name("&3" + profile.getName())
 				.lore(lore)
 				.build();
 	}

@@ -28,7 +28,7 @@ public class GrantsListMenu extends PaginatedMenu {
 
 	@Override
 	public String getPrePaginatedTitle(Player player) {
-		return "&6" + profile.getUsername() + "'s Grants (" + profile.getGrants().size() + ")";
+		return "&6" + profile.getName() + "'s Grants (" + profile.getGrants().size() + ")";
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class GrantsListMenu extends PaginatedMenu {
 				Profile addedByProfile = Profile.getByUuid(grant.getAddedBy());
 
 				if (addedByProfile != null && addedByProfile.isLoaded()) {
-					addedBy = addedByProfile.getUsername();
+					addedBy = addedByProfile.getName();
 				}
 			}
 
@@ -80,7 +80,7 @@ public class GrantsListMenu extends PaginatedMenu {
 				Profile removedByProfile = Profile.getByUuid(grant.getRemovedBy());
 
 				if (removedByProfile != null && removedByProfile.isLoaded()) {
-					removedBy = removedByProfile.getUsername();
+					removedBy = removedByProfile.getName();
 				}
 			}
 
@@ -101,7 +101,12 @@ public class GrantsListMenu extends PaginatedMenu {
 			} else {
 				if (!grant.hasExpired()) {
 					lore.add(CC.MENU_BAR);
-					lore.add("&aRight click to remove this grant");
+
+					if (player.hasPermission("zoot.grants.remove")) {
+						lore.add("&aRight click to remove this grant");
+					} else {
+						lore.add("&cYou cannot remove grants");
+					}
 				}
 			}
 
@@ -117,11 +122,17 @@ public class GrantsListMenu extends PaginatedMenu {
 		@Override
 		public void clicked(Player player, ClickType clickType) {
 			if (clickType == ClickType.RIGHT && !grant.isRemoved() && !grant.hasExpired()) {
-				GrantProcedure procedure = new GrantProcedure(player, profile, GrantProcedureType.REMOVE, GrantProcedureStage.REQUIRE_TEXT);
-				procedure.setGrant(grant);
+				if (player.hasPermission("zoot.grants.remove")) {
+					GrantProcedure procedure = new GrantProcedure(player, profile, GrantProcedureType.REMOVE,
+							GrantProcedureStage.REQUIRE_TEXT
+					);
+					procedure.setGrant(grant);
 
-				player.sendMessage(CC.GREEN + "Type a reason for removing this grant in chat...");
-				player.closeInventory();
+					player.sendMessage(CC.GREEN + "Type a reason for removing this grant in chat...");
+					player.closeInventory();
+				} else {
+					player.sendMessage(CC.RED + "You cannot remove grants.");
+				}
 			}
 		}
 	}

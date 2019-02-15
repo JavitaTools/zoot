@@ -4,7 +4,7 @@ import com.minexd.zoot.Zoot;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.command.CommandSender;
 
-@CommandMeta(label = "zoot debug", permission = "zoot.admin")
+@CommandMeta(label = "zoot debug", permission = "zoot.debug")
 public class ZootDebugCommand {
 
 	public void execute(CommandSender sender) {

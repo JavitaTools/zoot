@@ -16,6 +16,7 @@ public class RankSetPrefixCommand {
 
 		rank.setPrefix(CC.translate(prefix));
 		rank.save();
+		rank.refresh();
 
 		sender.sendMessage(CC.GREEN + "You updated the rank's prefix.");
 	}

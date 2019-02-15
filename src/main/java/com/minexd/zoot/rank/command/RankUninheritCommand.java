@@ -21,8 +21,10 @@ public class RankUninheritCommand {
 
 		if (parent.getInherited().remove(child)) {
 			parent.save();
+			parent.refresh();
+
 			sender.sendMessage(ChatColor.GREEN + "You made the parent rank " + parent.getDisplayName() +
-			                   " uninherit the child rank " + child.getDisplayName() + ".");
+			                   " no longer inherit the child rank " + child.getDisplayName() + ".");
 		} else {
 			sender.sendMessage(ChatColor.RED + "That parent rank does not inherit that child rank.");
 		}

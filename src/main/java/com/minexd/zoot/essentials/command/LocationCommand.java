@@ -4,7 +4,7 @@ import com.minexd.zoot.util.LocationUtil;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "loc", permission = "zoot.admin.loc")
+@CommandMeta(label = "loc", permission = "zoot.loc")
 public class LocationCommand {
 
 	public void execute(Player player) {

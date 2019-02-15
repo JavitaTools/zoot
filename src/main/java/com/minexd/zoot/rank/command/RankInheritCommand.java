@@ -22,6 +22,8 @@ public class RankInheritCommand {
 		if (parent.canInherit(child)) {
 			parent.getInherited().add(child);
 			parent.save();
+			parent.refresh();
+
 			sender.sendMessage(ChatColor.GREEN + "You made the parent rank " + parent.getDisplayName() +
 			                   " inherit the child rank " + child.getDisplayName() + ".");
 		} else {

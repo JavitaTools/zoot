@@ -6,43 +6,50 @@ import com.minexd.pidgin.Pidgin;
 import com.minexd.zoot.chat.Chat;
 import com.minexd.zoot.chat.command.ClearChatCommand;
 import com.minexd.zoot.chat.command.MuteChatCommand;
-import com.minexd.zoot.chat.ChatListener;
 import com.minexd.zoot.chat.command.SlowChatCommand;
 import com.minexd.zoot.config.ConfigValidation;
 import com.minexd.zoot.essentials.Essentials;
 import com.minexd.zoot.essentials.command.*;
-import com.minexd.zoot.essentials.EssentialsListener;
+import com.minexd.zoot.essentials.command.SudoAllCommand;
+import com.minexd.zoot.essentials.command.SudoCommand;
+import com.minexd.zoot.essentials.command.ZootDebugCommand;
 import com.minexd.zoot.network.NetworkPacketListener;
+import com.minexd.zoot.network.command.ReportCommand;
+import com.minexd.zoot.network.command.RequestCommand;
 import com.minexd.zoot.network.packet.PacketAddGrant;
 import com.minexd.zoot.network.packet.PacketBroadcastPunishment;
+import com.minexd.zoot.network.packet.PacketClearGrants;
 import com.minexd.zoot.network.packet.PacketDeleteGrant;
 import com.minexd.zoot.network.packet.PacketDeleteRank;
 import com.minexd.zoot.network.packet.PacketRefreshRank;
 import com.minexd.zoot.network.packet.PacketStaffChat;
 import com.minexd.zoot.network.packet.PacketStaffJoinNetwork;
 import com.minexd.zoot.network.packet.PacketStaffLeaveNetwork;
+import com.minexd.zoot.network.packet.PacketStaffReport;
+import com.minexd.zoot.network.packet.PacketStaffRequest;
 import com.minexd.zoot.network.packet.PacketStaffSwitchServer;
+import com.minexd.zoot.network.packet.PacketClearPunishments;
+import com.minexd.zoot.network.packet.PacketGlobalWhitelistRefresh;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.profile.ProfileTypeAdapter;
+import com.minexd.zoot.profile.grant.command.ClearGrantsCommand;
 import com.minexd.zoot.profile.option.command.OptionsCommand;
 import com.minexd.zoot.profile.conversation.command.MessageCommand;
 import com.minexd.zoot.profile.conversation.command.ReplyCommand;
 import com.minexd.zoot.profile.grant.command.GrantCommand;
 import com.minexd.zoot.profile.grant.command.GrantsCommand;
-import com.minexd.zoot.profile.grant.GrantListener;
-import com.minexd.zoot.profile.ProfileListener;
 import com.minexd.zoot.profile.option.command.ToggleGlobalChatCommand;
 import com.minexd.zoot.profile.option.command.TogglePrivateMessagesCommand;
 import com.minexd.zoot.profile.option.command.ToggleSoundsCommand;
 import com.minexd.zoot.profile.punishment.command.BanCommand;
 import com.minexd.zoot.profile.punishment.command.CheckCommand;
+import com.minexd.zoot.profile.punishment.command.ClearPunishmentsCommand;
 import com.minexd.zoot.profile.punishment.command.KickCommand;
 import com.minexd.zoot.profile.punishment.command.MuteCommand;
 import com.minexd.zoot.profile.punishment.command.UnbanCommand;
 import com.minexd.zoot.profile.punishment.command.UnmuteCommand;
 import com.minexd.zoot.profile.punishment.command.WarnCommand;
 import com.minexd.zoot.profile.staff.command.AltsCommand;
-import com.minexd.zoot.profile.punishment.listener.PunishmentListener;
 import com.minexd.zoot.profile.staff.command.StaffModeCommand;
 import com.minexd.zoot.rank.Rank;
 import com.minexd.zoot.rank.RankTypeAdapter;
@@ -56,7 +63,6 @@ import com.minexd.zoot.rank.command.RankInheritCommand;
 import com.minexd.zoot.rank.command.RankRemovePermissionCommand;
 import com.minexd.zoot.rank.command.RankSetColorCommand;
 import com.minexd.zoot.rank.command.RankSetPrefixCommand;
-import com.minexd.zoot.rank.command.RankSetSuffixCommand;
 import com.minexd.zoot.rank.command.RankSetWeightCommand;
 import com.minexd.zoot.rank.command.RankUninheritCommand;
 import com.minexd.zoot.rank.command.RanksCommand;
@@ -64,7 +70,6 @@ import com.minexd.zoot.util.CC;
 import com.minexd.zoot.util.adapter.ChatColorTypeAdapter;
 import com.minexd.zoot.util.duration.Duration;
 import com.minexd.zoot.util.duration.DurationTypeAdapter;
-import com.minexd.zoot.util.menu.MenuListener;
 import com.minexd.zoot.cache.RedisCache;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -76,14 +81,12 @@ import com.qrakn.phoenix.lang.file.type.BasicConfigurationFile;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -114,7 +117,7 @@ public class Zoot extends JavaPlugin {
 
 		mainConfig = new BasicConfigurationFile(this, "config");
 
-		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 3).check();
+		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 4).check();
 
 		loadMongo();
 		loadRedis();
@@ -128,18 +131,19 @@ public class Zoot extends JavaPlugin {
 		Arrays.asList(
 				new BroadcastCommand(),
 				new ClearCommand(),
-				new DayCommand(),
 				new GameModeCommand(),
 				new HealCommand(),
+				new ShowAllPlayersCommand(),
+				new ShowPlayerCommand(),
 				new HidePlayerCommand(),
 				new LocationCommand(),
 				new MoreCommand(),
-				new NightCommand(),
 				new RenameCommand(),
 				new SetSlotsCommand(),
 				new SetSpawnCommand(),
-				new ShowPlayerCommand(),
 				new SpawnCommand(),
+				new DayCommand(),
+				new NightCommand(),
 				new SunsetCommand(),
 				new ClearChatCommand(),
 				new SlowChatCommand(),
@@ -167,7 +171,6 @@ public class Zoot extends JavaPlugin {
 				new RanksCommand(),
 				new RankSetColorCommand(),
 				new RankSetPrefixCommand(),
-				new RankSetSuffixCommand(),
 				new RankSetWeightCommand(),
 				new RankUninheritCommand(),
 				new ZootDebugCommand(),
@@ -178,7 +181,13 @@ public class Zoot extends JavaPlugin {
 				new TogglePrivateMessagesCommand(),
 				new ToggleSoundsCommand(),
 				new PingCommand(),
-				new ListCommand()
+				new ListCommand(),
+				new ReportCommand(),
+				new RequestCommand(),
+				new ClearGrantsCommand(),
+				new ClearPunishmentsCommand(),
+				new SudoCommand(),
+				new SudoAllCommand()
 		).forEach(honcho::registerCommand);
 
 		honcho.registerTypeAdapter(Rank.class, new RankTypeAdapter());
@@ -202,31 +211,26 @@ public class Zoot extends JavaPlugin {
 				PacketStaffChat.class,
 				PacketStaffJoinNetwork.class,
 				PacketStaffLeaveNetwork.class,
-				PacketStaffSwitchServer.class
+				PacketStaffSwitchServer.class,
+				PacketGlobalWhitelistRefresh.class,
+				PacketStaffReport.class,
+				PacketStaffRequest.class,
+				PacketClearGrants.class,
+				PacketClearPunishments.class
 		).forEach(pidgin::registerPacket);
 
 		pidgin.registerListener(new NetworkPacketListener(this));
 
-		Arrays.asList(
-				new ProfileListener(this),
-				new MenuListener(this),
-				new EssentialsListener(this),
-				new ChatListener(this),
-				new GrantListener(this),
-				new PunishmentListener(this)
-		).forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
+//		Arrays.asList(
+//				new ProfileListener(),
+//				new MenuListener(this),
+//				new EssentialsListener(this),
+//				new ChatListener(this),
+//				new GrantListener(this),
+//				new PunishmentListener(this)
+//		).forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
 
 		Rank.init();
-		Profile.init();
-
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				for (Profile profile : Profile.getProfiles().values()) {
-					profile.checkGrants();
-				}
-			}
-		}.runTaskTimerAsynchronously(this, 20L, 20L);
 	}
 
 	@Override
@@ -239,47 +243,12 @@ public class Zoot extends JavaPlugin {
 	}
 
 	/**
-	 * Prints a message and exception to console. If the server is not in debug mode, the messages will be suppressed.
-	 *
-	 * @param level     The log level.
-	 * @param message   The message.
-	 * @param exception The thrown exception.
-	 */
-	public void debug(Level level, String message, Exception exception) {
-		getLogger().log(level, message);
-		exception.printStackTrace();
-	}
-
-	/**
-	 * Prints a message to console and server operators.
-	 *
-	 * @param message The message.
-	 */
-	public void debug(String message) {
-		if (debug) {
-			broadcastOps(CC.translate("&e(Debug) &r" + message));
-		}
-	}
-
-	/**
-	 * Prints a message triggered by an action a player performed to console and server operators.
-	 *
-	 * @param player  The player that triggered this log.
-	 * @param message The message.
-	 */
-	public void debug(Player player, String message) {
-		if (debug) {
-			broadcastOps(CC.translate("&e(Debug) &r" + player.getDisplayName() + ": " + message));
-		}
-	}
-
-	/**
 	 * Broadcasts a message to all server operators.
 	 *
 	 * @param message The message.
 	 */
 	public static void broadcastOps(String message) {
-		Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(op -> op.sendMessage(message));
+		Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(op -> op.sendMessage(CC.translate(message)));
 	}
 
 	private void loadMongo() {

@@ -2,7 +2,7 @@ package com.minexd.zoot.profile;
 
 import com.minexd.zoot.Locale;
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.BootstrappedListener;
+import com.minexd.zoot.ZootAPI;
 import com.minexd.zoot.cache.RedisPlayerData;
 import com.minexd.zoot.network.packet.PacketStaffChat;
 import com.minexd.zoot.profile.punishment.Punishment;
@@ -20,11 +20,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class ProfileListener extends BootstrappedListener {
+public class ProfileListener {
 
-	public ProfileListener(Zoot zoot) {
-		super(zoot);
-	}
+	private static Zoot plugin = Zoot.get();
 
 	@EventHandler
 	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
@@ -35,7 +33,7 @@ public class ProfileListener extends BootstrappedListener {
 		if (player != null && player.isOnline()) {
 			event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
 			event.setKickMessage(CC.RED + "You tried to login too quickly after disconnecting.\nTry again in a few seconds.");
-			zoot.getServer().getScheduler().runTask(zoot, () -> player.kickPlayer(CC.RED + "Duplicate login kick"));
+			plugin.getServer().getScheduler().runTask(plugin, () -> player.kickPlayer(CC.RED + "Duplicate login kick"));
 			return;
 		}
 
@@ -55,7 +53,7 @@ public class ProfileListener extends BootstrappedListener {
 				return;
 			}
 
-			profile.setUsername(event.getName());
+			profile.setName(event.getName());
 
 			if (profile.getFirstSeen() == null) {
 				profile.setFirstSeen(System.currentTimeMillis());
@@ -85,7 +83,6 @@ public class ProfileListener extends BootstrappedListener {
 			profile.save();
 		} catch (Exception e) {
 			e.printStackTrace();
-			zoot.debug(Level.SEVERE, "Failed to load profile for " + event.getName(), e);
 		}
 
 		if (profile == null || !profile.isLoaded()) {
@@ -98,11 +95,11 @@ public class ProfileListener extends BootstrappedListener {
 
 		RedisPlayerData playerData = new RedisPlayerData(event.getUniqueId(), event.getName());
 		playerData.setLastAction(RedisPlayerData.LastAction.JOINING_SERVER);
-		playerData.setLastSeenServer(zoot.getMainConfig().getString("SERVER_NAME"));
+		playerData.setLastSeenServer(Quartz.get().getServerId());
 		playerData.setLastSeenAt(System.currentTimeMillis());
 
-		zoot.getRedisCache().updatePlayerData(playerData);
-		zoot.getRedisCache().updateNameAndUUID(event.getName(), event.getUniqueId());
+		plugin.getRedisCache().updatePlayerData(playerData);
+		plugin.getRedisCache().updateNameAndUUID(event.getName(), event.getUniqueId());
 	}
 
 	@EventHandler
@@ -111,11 +108,7 @@ public class ProfileListener extends BootstrappedListener {
 		Profile profile = Profile.getProfiles().get(player.getUniqueId());
 		profile.setupBukkitPlayer(player);
 
-		for (String perm : profile.getActiveGrant().getRank().getAllPermissions()) {
-			zoot.debug(player, perm);
-		}
-
-		if (player.hasPermission("zoot.staff")) {
+		if (player.hasPermission("plugin..staff")) {
 			player.sendMessage(CC.GOLD + "Your staff mode is currently: " +
 					(profile.getStaffOptions().staffModeEnabled() ? CC.GREEN + "Enabled" : CC.RED + "Disabled"));
 		}
@@ -130,21 +123,17 @@ public class ProfileListener extends BootstrappedListener {
 			new BukkitRunnable() {
 				@Override
 				public void run() {
-					try {
-						profile.save();
-					} catch (Exception e) {
-						zoot.debug(Level.SEVERE, "Failed to save profile " + event.getPlayer().getName(), e);
-					}
+					profile.save();
 				}
 			}.runTaskAsynchronously(Zoot.get());
 		}
 
 		RedisPlayerData playerData = new RedisPlayerData(event.getPlayer().getUniqueId(), event.getPlayer().getName());
 		playerData.setLastAction(RedisPlayerData.LastAction.LEAVING_SERVER);
-		playerData.setLastSeenServer(zoot.getMainConfig().getString("SERVER_NAME"));
+		playerData.setLastSeenServer(Quartz.get().getServerId());
 		playerData.setLastSeenAt(System.currentTimeMillis());
 
-		zoot.getRedisCache().updatePlayerData(playerData);
+		plugin.getRedisCache().updatePlayerData(playerData);
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
@@ -153,8 +142,8 @@ public class ProfileListener extends BootstrappedListener {
 
 		if (profile.getStaffOptions().staffChatModeEnabled()) {
 			if (profile.getStaffOptions().staffModeEnabled()) {
-				Zoot.get().getPidgin().sendPacket(new PacketStaffChat(event.getPlayer().getDisplayName(),
-						Zoot.get().getMainConfig().getString("SERVER_NAME"), event.getMessage()));
+				Zoot.get().getPidgin().sendPacket(new PacketStaffChat(
+						ZootAPI.getColoredName(event.getPlayer()), Quartz.get().getServerId(), event.getMessage()));
 			} else {
 				event.getPlayer().sendMessage(CC.RED + "You must enable staff mode or disable staff chat mode.");
 			}

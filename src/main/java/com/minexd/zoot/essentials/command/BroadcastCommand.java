@@ -6,7 +6,7 @@ import com.qrakn.honcho.command.CommandOption;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-@CommandMeta(label = { "broadcast", "bc" }, options = "r", permission = "zoot.admin.broadcast")
+@CommandMeta(label = { "broadcast", "bc" }, options = "r", permission = "zoot.broadcast")
 public class BroadcastCommand {
 
 	public void execute(CommandSender sender, CommandOption option, String broadcast) {

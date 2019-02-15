@@ -1,5 +1,5 @@
 main: com.minexd.zoot.Zoot
-name: Zoot
+name: zoot
 author: joeleoli
-version: 1.0
+version: ${zoot.desc}
 depend: [ProtocolLib]

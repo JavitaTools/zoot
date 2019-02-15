@@ -15,34 +15,25 @@ import com.minexd.zoot.profile.grant.Grant;
 import com.minexd.zoot.profile.punishment.PunishmentType;
 import com.minexd.zoot.rank.Rank;
 import com.minexd.zoot.util.Cooldown;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class Profile {
 
-	@Getter private static Map<UUID, Profile> profiles = new HashMap<>();
-	private static MongoCollection<Document> collection;
-
-	@Getter @Setter private String username;
 	@Getter private final UUID uuid;
+	@Getter @Setter private String name;
 	@Getter @Setter private Long firstSeen;
 	@Getter @Setter private Long lastSeen;
 	@Getter @Setter private String currentAddress;
@@ -56,10 +47,11 @@ public class Profile {
 	@Getter private final List<Punishment> punishments;
 	@Getter @Setter private boolean loaded;
 	@Getter @Setter private Cooldown chatCooldown;
+	@Getter @Setter private Cooldown requestCooldown;
 
-	public Profile(String username, UUID uuid) {
-		this.username = username;
+	public Profile(UUID uuid, String name) {
 		this.uuid = uuid;
+		this.name = name;
 		this.grants = new ArrayList<>();
 		this.punishments = new ArrayList<>();
 		this.ipAddresses = new ArrayList<>();
@@ -68,6 +60,7 @@ public class Profile {
 		this.staffOptions = new ProfileStaffOptions();
 		this.conversations = new ProfileConversations(this);
 		this.chatCooldown = new Cooldown(0);
+		this.requestCooldown = new Cooldown(0);
 
 		load();
 	}
@@ -77,7 +70,7 @@ public class Profile {
 	}
 
 	public String getColoredUsername() {
-		return activeGrant.getRank().getColor() + username;
+		return activeGrant.getRank().getColor() + name;
 	}
 
 	public Punishment getActivePunishmentByType(PunishmentType type) {
@@ -104,6 +97,10 @@ public class Profile {
 		return activeGrant.getRank();
 	}
 
+	/**
+	 * Finds and applies the next best grant.
+	 * The next chosen grant is determined by comparing descending rank weights.
+	 */
 	public void activateNextGrant() {
 		List<Grant> grants = new ArrayList<>(this.grants);
 
@@ -113,7 +110,6 @@ public class Profile {
 		for (Grant grant : grants) {
 			if (!grant.isRemoved() && !grant.hasExpired()) {
 				if (!grant.equals(activeGrant)) {
-					Zoot.get().debug("");
 					activeGrant = grant;
 					setupBukkitPlayer(getPlayer());
 					return;
@@ -122,9 +118,13 @@ public class Profile {
 		}
 	}
 
+	/**
+	 * Checks for and updates any grants that have pending changes.
+	 */
 	public void checkGrants() {
 		Player player = getPlayer();
 
+		// Update grants that are expired and not removed yet
 		for (Grant grant : grants) {
 			if (!grant.isRemoved() && grant.hasExpired()) {
 				grant.setRemovedAt(System.currentTimeMillis());
@@ -134,13 +134,15 @@ public class Profile {
 				if (player != null) {
 					new GrantExpireEvent(player, grant).call();
 				}
-
-				if (grant.equals(activeGrant)) {
-					activateNextGrant();
-				}
 			}
 		}
 
+		// Active next available grant if active grant is now removed
+		if (activeGrant != null && activeGrant.isRemoved()) {
+			activateNextGrant();
+		}
+
+		// Generate a default grant if there is no active grant
 		if (activeGrant == null) {
 			Grant defaultGrant = new Grant(UUID.randomUUID(), Rank.getDefaultRank(), null,
 					System.currentTimeMillis(), "Default", Integer.MAX_VALUE);
@@ -149,6 +151,7 @@ public class Profile {
 			activeGrant = defaultGrant;
 
 			if (player != null) {
+				setupBukkitPlayer(getPlayer());
 				new GrantAppliedEvent(player, defaultGrant).call();
 			}
 		}
@@ -159,8 +162,10 @@ public class Profile {
 			return;
 		}
 
+		// Clear any permissions set for this player by this plugin
 		for (PermissionAttachmentInfo attachmentInfo : player.getEffectivePermissions()) {
-			if (attachmentInfo.getAttachment() == null) {
+			if (attachmentInfo.getAttachment() == null || attachmentInfo.getAttachment().getPlugin() == null ||
+			    !attachmentInfo.getAttachment().getPlugin().equals(Zoot.get())) {
 				continue;
 			}
 
@@ -171,14 +176,18 @@ public class Profile {
 
 		PermissionAttachment attachment = player.addAttachment(Zoot.get());
 
-		for (String perm : activeGrant.getRank().getAllPermissions()) {
-			attachment.setPermission(perm, true);
+		for (String permission : activeGrant.getRank().getAllPermissions()) {
+			attachment.setPermission(permission, true);
 		}
 
 		player.recalculatePermissions();
 
-		String displayName = activeGrant.getRank().getPrefix() + player.getName() + activeGrant.getRank().getSuffix();
+		String displayName = activeGrant.getRank().getPrefix() + player.getName();
 		String coloredName = ZootAPI.getColoredName(player);
+
+		if (coloredName.length() > 16) {
+			coloredName = coloredName.substring(0, 15);
+		}
 
 		player.setDisplayName(displayName);
 
@@ -191,8 +200,8 @@ public class Profile {
 		Document document = collection.find(Filters.eq("uuid", uuid.toString())).first();
 
 		if (document != null) {
-			if (username == null) {
-				username = document.getString("username");
+			if (name == null) {
+				name = document.getString("name");
 			}
 
 			firstSeen = document.getLong("firstSeen");
@@ -238,7 +247,7 @@ public class Profile {
 
 	public void save() {
 		Document document = new Document();
-		document.put("username", username);
+		document.put("name", name);
 		document.put("uuid", uuid.toString());
 		document.put("firstSeen", firstSeen);
 		document.put("lastSeen", lastSeen);
@@ -268,63 +277,6 @@ public class Profile {
 		document.put("punishments", punishmentList.toString());
 
 		collection.replaceOne(Filters.eq("uuid", uuid.toString()), document, new ReplaceOptions().upsert(true));
-	}
-
-	public static void init() {
-		collection = Zoot.get().getMongoDatabase().getCollection("profiles");
-	}
-
-	public static Profile getByUuid(UUID uuid) {
-		if (profiles.containsKey(uuid)) {
-			return profiles.get(uuid);
-		}
-
-		return new Profile(null, uuid);
-	}
-
-	public static Profile getByUsername(String username) {
-		Player player = Bukkit.getPlayer(username);
-
-		if (player != null) {
-			return profiles.get(player.getUniqueId());
-		}
-
-		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(username);
-
-		if (offlinePlayer.hasPlayedBefore()) {
-			if (profiles.containsKey(offlinePlayer.getUniqueId())) {
-				return profiles.get(offlinePlayer.getUniqueId());
-			}
-
-			return new Profile(offlinePlayer.getName(), offlinePlayer.getUniqueId());
-		}
-
-		UUID uuid = Zoot.get().getRedisCache().getUuid(username);
-
-		if (uuid != null) {
-			if (profiles.containsKey(uuid)) {
-				return profiles.get(uuid);
-			}
-
-			return new Profile(username, uuid);
-		}
-
-		return null;
-	}
-
-	public static List<Profile> getByIpAddress(String ipAddress) {
-		List<Profile> profiles = new ArrayList<>();
-		Bson filter = Filters.eq("currentAddress", ipAddress);
-
-		try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
-			while (cursor.hasNext()) {
-				Document document = cursor.next();
-				profiles.add(new Profile(document.getString("username"),
-						UUID.fromString(document.getString("uuid"))));
-			}
-		}
-
-		return profiles;
 	}
 
 }

@@ -2,23 +2,24 @@ package com.minexd.zoot.cache;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.minexd.helper.util.Log;
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.Bootstrapped;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
-import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.json.simple.parser.ParseException;
 import redis.clients.jedis.Jedis;
 
-public class RedisCache extends Bootstrapped {
+public class RedisCache {
+
+	private Zoot zoot;
 
 	public RedisCache(Zoot zoot) {
-		super(zoot);
+		this.zoot = zoot;
 	}
 
 	public UUID getUuid(String name) {
@@ -33,7 +34,8 @@ public class RedisCache extends Bootstrapped {
 				return UUID.fromString(uuid);
 			}
 		} catch (Exception e) {
-			zoot.debug(Level.WARNING, "Could not connect to redis", e);
+			Log.info("Could not connect to redis");
+			e.printStackTrace();
 		}
 
 		try {
@@ -44,7 +46,8 @@ public class RedisCache extends Bootstrapped {
 				return uuid;
 			}
 		} catch (Exception e) {
-			zoot.debug(Level.WARNING, "Could not fetch from Mojang API", e);
+			Log.info("Could not fetch from Mojang API");
+			e.printStackTrace();
 		}
 
 		return null;
@@ -107,8 +110,7 @@ public class RedisCache extends Bootstrapped {
 		String part = id[0];
 		part = part.substring(7, 39);
 
-		return UUID.fromString(String.valueOf(part).replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
-				"$1-$2-$3-$4-$5"));
+		return UUID.fromString(part.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
 	}
 
 }

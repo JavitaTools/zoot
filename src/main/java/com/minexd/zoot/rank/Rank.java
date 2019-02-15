@@ -3,6 +3,7 @@ package com.minexd.zoot.rank;
 import com.minexd.zoot.Zoot;
 import com.minexd.zoot.network.packet.PacketDeleteRank;
 import com.minexd.zoot.network.packet.PacketRefreshRank;
+import com.minexd.zoot.profile.Profile;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
@@ -17,7 +18,9 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 public class Rank {
 
@@ -27,7 +30,6 @@ public class Rank {
 	@Getter private final UUID uuid;
 	@Getter private final String displayName;
 	@Getter @Setter private String prefix = "";
-	@Getter @Setter private String suffix = "";
 	@Getter @Setter private ChatColor color = ChatColor.WHITE;
 	@Getter @Setter private int weight;
 	@Setter private boolean defaultRank;
@@ -48,12 +50,10 @@ public class Rank {
 		ranks.put(uuid, this);
 	}
 
-	public Rank(UUID uuid, String displayName, String prefix, String suffix, ChatColor color, int weight,
-			boolean defaultRank) {
+	public Rank(UUID uuid, String displayName, String prefix, ChatColor color, int weight, boolean defaultRank) {
 		this.uuid = uuid;
 		this.displayName = displayName;
 		this.prefix = prefix;
-		this.suffix = suffix;
 		this.color = color;
 		this.weight = weight;
 		this.defaultRank = defaultRank;
@@ -63,19 +63,6 @@ public class Rank {
 
 	public boolean isDefaultRank() {
 		return defaultRank;
-	}
-
-	public boolean addPermission(String permission) {
-		if (!permissions.contains(permission)) {
-			permissions.add(permission);
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean removePermission(String permission) {
-		return permissions.remove(permission);
 	}
 
 	public boolean hasPermission(String permission) {
@@ -127,10 +114,12 @@ public class Rank {
 		}
 
 		prefix = ChatColor.translateAlternateColorCodes('&', document.getString("prefix"));
-		suffix = ChatColor.translateAlternateColorCodes('&', document.getString("suffix"));
 		color = ChatColor.valueOf(document.getString("color"));
 		weight = document.getInteger("weight");
 		defaultRank = document.getBoolean("defaultRank");
+
+		permissions.clear();
+		permissions.addAll(Zoot.GSON.<List<String>>fromJson(document.getString("permissions"), Zoot.LIST_STRING_TYPE));
 
 		inherited.clear();
 
@@ -146,7 +135,6 @@ public class Rank {
 		document.put("uuid", uuid.toString());
 		document.put("displayName", displayName);
 		document.put("prefix", prefix.replace(String.valueOf(ChatColor.COLOR_CHAR), "&"));
-		document.put("suffix", suffix.replace(String.valueOf(ChatColor.COLOR_CHAR), "&"));
 		document.put("color", color.name());
 		document.put("weight", weight);
 		document.put("defaultRank", defaultRank);
@@ -170,6 +158,16 @@ public class Rank {
 		Zoot.get().getPidgin().sendPacket(new PacketDeleteRank(uuid));
 	}
 
+	public void refresh() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Profile profile = Profile.getByUuid(player.getUniqueId());
+
+			if (this.equals(profile.getActiveRank())) {
+				profile.setupBukkitPlayer(player);
+			}
+		}
+	}
+
 	public static void init() {
 		collection = Zoot.get().getMongoDatabase().getCollection("ranks");
 
@@ -182,9 +180,7 @@ public class Rank {
 				Rank rank = new Rank(UUID.fromString(document.getString("uuid")),
 						document.getString("displayName"));
 				rank.load(document);
-
-				Zoot.GSON.<List<String>>fromJson(document.getString("permissions"), Zoot.LIST_STRING_TYPE)
-						.forEach(perm -> rank.getPermissions().add(perm));
+				rank.inherited.clear();
 
 				List<UUID> ranksToInherit = new ArrayList<>();
 

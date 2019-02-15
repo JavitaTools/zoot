@@ -22,6 +22,7 @@ public class RankSetColorCommand {
 
 		rank.setColor(chatColor);
 		rank.save();
+		rank.refresh();
 
 		sender.sendMessage(CC.GREEN + "You updated the rank's color.");
 	}

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-@CommandMeta(label = { "clearinv", "clear", "ci" }, permission = "zoot.admin.clearinv")
+@CommandMeta(label = { "clearinv", "clear", "ci" }, permission = "zoot.clearinv")
 public class ClearCommand {
 
 	public void execute(Player player) {

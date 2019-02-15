@@ -26,7 +26,6 @@ public class RankInfoCommand {
 
 			toSend.add(ChatColor.GRAY + "Weight: " + ChatColor.RESET + rank.getWeight());
 			toSend.add(ChatColor.GRAY + "Prefix: " + ChatColor.RESET + rank.getPrefix() + "Example");
-			toSend.add(ChatColor.GRAY + "Suffix: " + ChatColor.RESET + rank.getSuffix() + "Example");
 
 			List<String> permissions = rank.getAllPermissions();
 
@@ -43,10 +42,12 @@ public class RankInfoCommand {
 			toSend.add(ChatColor.GRAY + "Inherits: " + ChatColor.RESET + "(" + inherited.size() + ")");
 
 			if (!rank.getInherited().isEmpty()) {
-				toSend.addAll(rank.getInherited()
-				                  .stream()
-				                  .map(inheritedRank -> inheritedRank.getColor() + inheritedRank.getDisplayName())
-				                  .collect(Collectors.toList()));
+				List<String> rankNames = rank.getInherited()
+				                             .stream()
+				                             .map(inheritedRank -> inheritedRank.getColor() + inheritedRank.getDisplayName())
+				                             .collect(Collectors.toList());
+
+				toSend.addAll(TextSplitter.split(46, StringUtils.join(rankNames, " "), "", ", "));
 			}
 
 			toSend.add(CC.CHAT_BAR);

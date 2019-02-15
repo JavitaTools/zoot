@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 
 public class Essentials extends Bootstrapped {
@@ -68,6 +69,12 @@ public class Essentials extends Bootstrapped {
 
 		entityLoop:
 		for (Entity entity : world.getEntities()) {
+			if (entity instanceof Item) {
+				removed++;
+				entity.remove();
+				continue entityLoop;
+			}
+
 			for (EntityType type : excluded) {
 				if (entity.getType() == EntityType.PLAYER) {
 					continue entityLoop;

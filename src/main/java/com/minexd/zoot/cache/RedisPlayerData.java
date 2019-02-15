@@ -17,7 +17,7 @@ public class RedisPlayerData {
 
 	public RedisPlayerData(JsonObject object) {
 		this.uuid = UUID.fromString(object.get("uuid").getAsString());
-		this.username = object.get("username").getAsString();
+		this.username = object.get("name").getAsString();
 		this.lastAction = LastAction.valueOf(object.get("lastAction").getAsString());
 		this.lastSeenServer = object.get("lastSeenServer").getAsString();
 		this.lastSeenAt = object.get("lastSeenAt").getAsLong();
@@ -31,7 +31,7 @@ public class RedisPlayerData {
 	public JsonObject getJson() {
 		return new JsonChain()
 				.addProperty("uuid", uuid.toString())
-				.addProperty("username", username)
+				.addProperty("name", username)
 				.addProperty("lastAction", lastAction.name())
 				.addProperty("lastSeenServer", lastSeenServer)
 				.addProperty("lastSeenAt", lastSeenAt)

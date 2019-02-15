@@ -6,7 +6,7 @@ import com.minexd.zoot.util.CC;
 import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.command.CommandSender;
 
-@CommandMeta(label = "setslots", async = true, permission = "zoot.admin.setslots")
+@CommandMeta(label = "setslots", async = true, permission = "zoot.setslots")
 public class SetSlotsCommand {
 
 	public void execute(CommandSender sender, int slots) {

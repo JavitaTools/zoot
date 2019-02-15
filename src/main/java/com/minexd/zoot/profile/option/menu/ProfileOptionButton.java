@@ -23,8 +23,8 @@ public abstract class ProfileOptionButton extends Button {
 		lore.add("");
 		lore.addAll(TextSplitter.split(40, getDescription(), CC.GRAY, " "));
 		lore.add("");
-		lore.add((isEnabled(player) ? CC.BLUE + StringEscapeUtils.unescapeJava(" » ") : "    ") + "&e" + getEnabledOption());
-		lore.add((!isEnabled(player) ? CC.BLUE + StringEscapeUtils.unescapeJava(" » ") : "    ") + "&e" + getDisabledOption());
+		lore.add((isEnabled(player) ? CC.BLUE + StringEscapeUtils.unescapeJava(" » ") : "   ") + "&e" + getEnabledOption());
+		lore.add((!isEnabled(player) ? CC.BLUE + StringEscapeUtils.unescapeJava(" » ") : "   ") + "&e" + getDisabledOption());
 		lore.add("");
 		lore.add("&eClick to toggle this option.");
 

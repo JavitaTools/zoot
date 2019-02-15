@@ -1,6 +1,8 @@
 package com.minexd.zoot.profile.staff.command;
 
+import com.minexd.quartz.Quartz;
 import com.minexd.zoot.Zoot;
+import com.minexd.zoot.ZootAPI;
 import com.minexd.zoot.network.packet.PacketStaffChat;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.util.CC;
@@ -26,8 +28,8 @@ public class StaffChatCommand {
 			return;
 		}
 
-		Zoot.get().getPidgin().sendPacket(new PacketStaffChat(player.getDisplayName(),
-				Zoot.get().getMainConfig().getString("SERVER_NAME"), message));
+		Zoot.get().getPidgin().sendPacket(new PacketStaffChat(ZootAPI.getColoredName(player),
+				Quartz.get().getServerId(), message));
 	}
 
 }

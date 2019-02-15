@@ -1,6 +1,8 @@
 package com.minexd.zoot;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.bukkit.ChatColor;
 
@@ -12,18 +14,17 @@ public enum Locale {
 	PLAYER_NOT_FOUND("COMMON_ERRORS.PLAYER_NOT_FOUND"),
 	RANK_NOT_FOUND("COMMON_ERRORS.RANK_NOT_FOUND"),
 	STAFF_CHAT("STAFF.CHAT"),
-	STAFF_BROADCAST_PREFIX("STAFF.BROADCAST_PREFIX"),
 	STAFF_JOIN_NETWORK("STAFF.JOIN_NETWORK"),
 	STAFF_SWITCH_SERVER("STAFF.SWITCH_SERVER"),
 	STAFF_LEAVE_NETWORK("STAFF.LEAVE_NETWORK"),
+	STAFF_REPORT_BROADCAST("STAFF.REPORT_BROADCAST"),
+	STAFF_REQUEST_BROADCAST("STAFF.REQUEST_BROADCAST"),
+	STAFF_REQUEST_SUBMITTED("STAFF.REQUEST_SUBMITTED"),
 	CLEAR_CHAT_BROADCAST("CHAT.CLEAR_CHAT_BROADCAST"),
 	MUTE_CHAT_BROADCAST("CHAT.MUTE_CHAT_BROADCAST"),
 	DELAY_CHAT_ENABLED_BROADCAST("CHAT.DELAY_CHAT_ENABLED_BROADCAST"),
 	DELAY_CHAT_DISABLED_BROADCAST("CHAT.DELAY_CHAT_DISABLED_BROADCAST"),
 	CHAT_DELAYED("CHAT.CHAT_DELAYED"),
-	NETWORK_BROADCAST_PREFIX("NETWORK.BROADCAST_PREFIX"),
-	NETWORK_RANK_REFRESHED("NETWORK.RANK_REFRESH"),
-	NETWORK_RANK_DELETED("NETWORK.RANK_DELETE"),
 	CONVERSATION_SEND_MESSAGE("CONVERSATION.SEND_MESSAGE"),
 	CONVERSATION_RECEIVE_MESSAGE("CONVERSATION.RECEIVE_MESSAGE"),
 	OPTIONS_PRIVATE_MESSAGES_ENABLED("OPTIONS.PRIVATE_MESSAGES_ENABLED"),
@@ -38,6 +39,22 @@ public enum Locale {
 	public String format(Object... objects) {
 		return new MessageFormat(ChatColor.translateAlternateColorCodes('&',
 				Zoot.get().getMainConfig().getString(path))).format(objects);
+	}
+
+	public List<String> formatLines(Object... objects) {
+		List<String> lines = new ArrayList<>();
+
+		if (Zoot.get().getMainConfig().get(path) instanceof String) {
+			lines.add(new MessageFormat(ChatColor.translateAlternateColorCodes('&',
+					Zoot.get().getMainConfig().getString(path))).format(objects));
+		} else {
+			for (String string : Zoot.get().getMainConfig().getStringList(path)) {
+				lines.add(new MessageFormat(ChatColor.translateAlternateColorCodes('&', string))
+						.format(objects));
+			}
+		}
+
+		return lines;
 	}
 
 //	public static final String PUBLIC_CHAT_MUTE_APPLIED = "&bThe public chat has been muted by {actor}";

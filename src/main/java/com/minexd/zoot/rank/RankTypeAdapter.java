@@ -16,7 +16,7 @@ public class RankTypeAdapter implements CommandTypeAdapter {
 		List<String> completed = new ArrayList<>();
 
 		for (Rank rank : Rank.getRanks().values()) {
-			if (rank.getDisplayName().toLowerCase().startsWith(string)) {
+			if (rank.getDisplayName().toLowerCase().startsWith(string.toLowerCase())) {
 				completed.add(rank.getDisplayName());
 			}
 		}

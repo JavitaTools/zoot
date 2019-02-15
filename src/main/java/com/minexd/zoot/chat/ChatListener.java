@@ -4,8 +4,11 @@ import com.minexd.zoot.Locale;
 import com.minexd.zoot.Zoot;
 import com.minexd.zoot.bootstrap.BootstrappedListener;
 import com.minexd.zoot.chat.event.ChatAttemptEvent;
+import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.util.CC;
 import com.minexd.zoot.util.TimeUtil;
+import java.util.function.Predicate;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -53,10 +56,20 @@ public class ChatListener extends BootstrappedListener {
 				case CHAT_DELAYED: {
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(Locale.CHAT_DELAYED.format(
-							TimeUtil.millisToSeconds((int) chatAttempt.getValue())) + " seconds");
+							TimeUtil.millisToSeconds((long) chatAttempt.getValue())) + " seconds");
 				}
 				break;
 			}
+		}
+
+		if (chatAttempt.getResponse() == ChatAttempt.Response.ALLOWED) {
+			event.getRecipients().removeIf(new Predicate<Player>() {
+				@Override
+				public boolean test(Player player) {
+					Profile profile = Profile.getProfiles().get(player.getUniqueId());
+					return profile != null && !profile.getOptions().publicChatEnabled();
+				}
+			});
 		}
 	}
 

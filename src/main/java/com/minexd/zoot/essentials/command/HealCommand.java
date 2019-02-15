@@ -6,7 +6,7 @@ import com.qrakn.honcho.command.CommandMeta;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "heal", permission = "zoot.admin.heal")
+@CommandMeta(label = "heal", permission = "zoot.heal")
 public class HealCommand {
 
 	public void execute(Player player) {

@@ -7,7 +7,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
-@CommandMeta(label = "tpworld", permission = "zoot.admin.tpworld")
+@CommandMeta(label = "tpworld", permission = "zoot.tpworld")
 public class TeleportWorldCommand {
 
 	public void execute(Player player, String worldName) {

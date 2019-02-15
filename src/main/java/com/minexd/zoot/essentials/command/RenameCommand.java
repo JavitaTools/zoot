@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-@CommandMeta(label = "rename", permission = "zoot.staff.rename")
+@CommandMeta(label = "rename", permission = "zoot.rename")
 public class RenameCommand {
 
 	public void execute(Player player, String name) {

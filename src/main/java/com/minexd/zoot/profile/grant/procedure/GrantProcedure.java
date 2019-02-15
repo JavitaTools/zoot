@@ -28,7 +28,9 @@ public class GrantProcedure {
 	}
 
 	public void finish() {
-		this.recipient.save();
+		recipient.save();
+		recipient.checkGrants();
+
 		procedures.remove(this);
 	}
 

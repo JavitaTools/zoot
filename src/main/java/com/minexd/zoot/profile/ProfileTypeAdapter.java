@@ -15,10 +15,10 @@ public class ProfileTypeAdapter implements CommandTypeAdapter {
 		List<String> completed = new ArrayList<>();
 
 		for (Profile profile : Profile.getProfiles().values()) {
-			if (profile.getUsername() == null) continue;
+			if (profile.getName() == null) continue;
 
-			if (profile.getUsername().toLowerCase().startsWith(string.toLowerCase())) {
-				completed.add(profile.getUsername());
+			if (profile.getName().toLowerCase().startsWith(string.toLowerCase())) {
+				completed.add(profile.getName());
 			}
 		}
 
