@@ -1,6 +1,5 @@
 package com.minexd.zoot.network.command;
 
-import com.minexd.quartz.Quartz;
 import com.minexd.zoot.Locale;
 import com.minexd.zoot.Zoot;
 import com.minexd.zoot.ZootAPI;
@@ -9,6 +8,7 @@ import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.util.Cooldown;
 import com.qrakn.honcho.command.CPL;
 import com.qrakn.honcho.command.CommandMeta;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -37,8 +37,8 @@ public class ReportCommand {
 				ZootAPI.getColoredName(player),
 				ZootAPI.getColoredName(target),
 				reason,
-				Quartz.get().getServerId(),
-				Quartz.get().getServerName()
+				Bukkit.getServerId(),
+				Bukkit.getServerName()
 		));
 
 		profile.setRequestCooldown(new Cooldown(120_000L));

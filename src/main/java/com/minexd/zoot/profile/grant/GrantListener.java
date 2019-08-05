@@ -1,7 +1,6 @@
 package com.minexd.zoot.profile.grant;
 
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.BootstrappedListener;
 import com.minexd.zoot.network.packet.PacketDeleteGrant;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.profile.grant.event.GrantAppliedEvent;
@@ -16,13 +15,10 @@ import com.minexd.zoot.util.menu.menus.ConfirmMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-public class GrantListener extends BootstrappedListener {
-
-	public GrantListener(Zoot zoot) {
-		super(zoot);
-	}
+public class GrantListener implements Listener {
 
 	@EventHandler
 	public void onGrantAppliedEvent(GrantAppliedEvent event) {

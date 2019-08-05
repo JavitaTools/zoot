@@ -17,7 +17,6 @@ import com.minexd.zoot.network.packet.PacketStaffReport;
 import com.minexd.zoot.network.packet.PacketStaffRequest;
 import com.minexd.zoot.network.packet.PacketStaffSwitchServer;
 import com.minexd.zoot.network.packet.PacketClearPunishments;
-import com.minexd.zoot.network.packet.PacketGlobalWhitelistRefresh;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.profile.grant.Grant;
 import com.minexd.zoot.profile.grant.event.GrantAppliedEvent;
@@ -146,18 +145,6 @@ public class NetworkPacketListener implements PacketListener {
 	public void onStaffSwitchServer(PacketStaffSwitchServer packet) {
 		zoot.getServer().broadcast(Locale.STAFF_SWITCH_SERVER.format(packet.getPlayerName(), packet.getToServerName(),
 				packet.getFromServerName()), "zoot.staff");
-	}
-
-	@IncomingPacketHandler
-	public void onGlobalWhitelistRefresh(PacketGlobalWhitelistRefresh packet) {
-		zoot.getWhitelist().fetchFromRedis();
-
-		String[] details = new String[]{
-				zoot.getWhitelist().isEnabled() ? "Enabled" : "Disabled",
-				zoot.getWhitelist().getMode().getReadable()
-		};
-
-		Zoot.broadcastOps(String.format("&8[&eNetwork&8] &fRefreshed global whitelist (%1$s) (%2$s)", details[0], details[1]));
 	}
 
 	@IncomingPacketHandler

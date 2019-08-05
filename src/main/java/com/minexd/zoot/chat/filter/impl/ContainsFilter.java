@@ -1,18 +1,14 @@
 package com.minexd.zoot.chat.filter.impl;
 
-import com.minexd.zoot.Zoot;
 import com.minexd.zoot.chat.filter.ChatFilter;
 
 public class ContainsFilter extends ChatFilter {
 
 	private final String phrase;
 
-	public ContainsFilter(Zoot zoot, String phrase) {
-		this(zoot, phrase, null);
-	}
+	public ContainsFilter(String phrase, String command) {
+		super(command);
 
-	public ContainsFilter(Zoot zoot, String phrase, String command) {
-		super(zoot, command);
 		this.phrase = phrase;
 	}
 

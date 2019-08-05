@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.minexd.pidgin.Pidgin;
 import com.minexd.zoot.chat.Chat;
+import com.minexd.zoot.chat.ChatListener;
 import com.minexd.zoot.chat.command.ClearChatCommand;
 import com.minexd.zoot.chat.command.MuteChatCommand;
 import com.minexd.zoot.chat.command.SlowChatCommand;
 import com.minexd.zoot.config.ConfigValidation;
 import com.minexd.zoot.essentials.Essentials;
+import com.minexd.zoot.essentials.EssentialsListener;
 import com.minexd.zoot.essentials.command.*;
 import com.minexd.zoot.essentials.command.SudoAllCommand;
 import com.minexd.zoot.essentials.command.SudoCommand;
@@ -29,9 +31,10 @@ import com.minexd.zoot.network.packet.PacketStaffReport;
 import com.minexd.zoot.network.packet.PacketStaffRequest;
 import com.minexd.zoot.network.packet.PacketStaffSwitchServer;
 import com.minexd.zoot.network.packet.PacketClearPunishments;
-import com.minexd.zoot.network.packet.PacketGlobalWhitelistRefresh;
 import com.minexd.zoot.profile.Profile;
+import com.minexd.zoot.profile.ProfileListener;
 import com.minexd.zoot.profile.ProfileTypeAdapter;
+import com.minexd.zoot.profile.grant.GrantListener;
 import com.minexd.zoot.profile.grant.command.ClearGrantsCommand;
 import com.minexd.zoot.profile.option.command.OptionsCommand;
 import com.minexd.zoot.profile.conversation.command.MessageCommand;
@@ -49,6 +52,7 @@ import com.minexd.zoot.profile.punishment.command.MuteCommand;
 import com.minexd.zoot.profile.punishment.command.UnbanCommand;
 import com.minexd.zoot.profile.punishment.command.UnmuteCommand;
 import com.minexd.zoot.profile.punishment.command.WarnCommand;
+import com.minexd.zoot.profile.punishment.listener.PunishmentListener;
 import com.minexd.zoot.profile.staff.command.AltsCommand;
 import com.minexd.zoot.profile.staff.command.StaffModeCommand;
 import com.minexd.zoot.rank.Rank;
@@ -71,6 +75,7 @@ import com.minexd.zoot.util.adapter.ChatColorTypeAdapter;
 import com.minexd.zoot.util.duration.Duration;
 import com.minexd.zoot.util.duration.DurationTypeAdapter;
 import com.minexd.zoot.cache.RedisCache;
+import com.minexd.zoot.util.menu.MenuListener;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
@@ -83,6 +88,8 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import net.evilblock.restrix.api.JavaPluginProxy;
+import net.evilblock.restrix.api.RestrixPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -90,7 +97,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class Zoot extends JavaPlugin {
+public class Zoot extends RestrixPlugin {
 
 	public static final Gson GSON = new Gson();
 	public static final Type LIST_STRING_TYPE = new TypeToken<List<String>>() {}.getType();
@@ -115,7 +122,9 @@ public class Zoot extends JavaPlugin {
 	public void onEnable() {
 		zoot = this;
 
-		mainConfig = new BasicConfigurationFile(this, "config");
+		JavaPlugin proxy = JavaPluginProxy.getProxy(this);
+
+		mainConfig = new BasicConfigurationFile(proxy, "config");
 
 		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 4).check();
 
@@ -126,7 +135,7 @@ public class Zoot extends JavaPlugin {
 		essentials = new Essentials(this);
 		chat = new Chat(this);
 
-		honcho = new Honcho(this);
+		honcho = new Honcho(proxy);
 
 		Arrays.asList(
 				new BroadcastCommand(),
@@ -212,7 +221,6 @@ public class Zoot extends JavaPlugin {
 				PacketStaffJoinNetwork.class,
 				PacketStaffLeaveNetwork.class,
 				PacketStaffSwitchServer.class,
-				PacketGlobalWhitelistRefresh.class,
 				PacketStaffReport.class,
 				PacketStaffRequest.class,
 				PacketClearGrants.class,
@@ -221,14 +229,14 @@ public class Zoot extends JavaPlugin {
 
 		pidgin.registerListener(new NetworkPacketListener(this));
 
-//		Arrays.asList(
-//				new ProfileListener(),
-//				new MenuListener(this),
-//				new EssentialsListener(this),
-//				new ChatListener(this),
-//				new GrantListener(this),
-//				new PunishmentListener(this)
-//		).forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
+		Arrays.asList(
+				new ProfileListener(),
+				new MenuListener(),
+				new EssentialsListener(),
+				new ChatListener(),
+				new GrantListener(),
+				new PunishmentListener()
+		).forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
 
 		Rank.init();
 	}

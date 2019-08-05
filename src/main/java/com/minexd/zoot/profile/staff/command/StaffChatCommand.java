@@ -1,12 +1,12 @@
 package com.minexd.zoot.profile.staff.command;
 
-import com.minexd.quartz.Quartz;
 import com.minexd.zoot.Zoot;
 import com.minexd.zoot.ZootAPI;
 import com.minexd.zoot.network.packet.PacketStaffChat;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.util.CC;
 import com.qrakn.honcho.command.CommandMeta;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 @CommandMeta(label = { "staffchat", "sc" }, permission = "zoot.staff")
@@ -29,7 +29,7 @@ public class StaffChatCommand {
 		}
 
 		Zoot.get().getPidgin().sendPacket(new PacketStaffChat(ZootAPI.getColoredName(player),
-				Quartz.get().getServerId(), message));
+				Bukkit.getServerId(), message));
 	}
 
 }

@@ -1,7 +1,6 @@
 package com.minexd.zoot.essentials;
 
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.Bootstrapped;
 import com.minexd.zoot.essentials.event.SpawnTeleportEvent;
 import com.minexd.zoot.util.LocationUtil;
 import java.io.IOException;
@@ -12,14 +11,14 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 
-public class Essentials extends Bootstrapped {
+public class Essentials {
 
+	private Zoot zoot;
 	private Location spawn;
 
 	public Essentials(Zoot zoot) {
-		super(zoot);
-
-		spawn = LocationUtil.deserialize(zoot.getMainConfig().getStringOrDefault("ESSENTIAL.SPAWN_LOCATION", null));
+		this.zoot = zoot;
+		this.spawn = LocationUtil.deserialize(zoot.getMainConfig().getStringOrDefault("ESSENTIAL.SPAWN_LOCATION", null));
 	}
 
 	public void setSpawn(Location location) {

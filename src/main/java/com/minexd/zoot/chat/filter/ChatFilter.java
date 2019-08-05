@@ -1,16 +1,16 @@
 package com.minexd.zoot.chat.filter;
 
-import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.Bootstrapped;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
-public abstract class ChatFilter extends Bootstrapped {
+public abstract class ChatFilter implements Listener {
 
 	private String command;
 
-	public ChatFilter(Zoot zoot, String command) {
-		super(zoot);
+	public ChatFilter() {}
 
+	public ChatFilter(String command) {
 		this.command = command;
 	}
 
@@ -18,7 +18,7 @@ public abstract class ChatFilter extends Bootstrapped {
 
 	public void punish(Player player) {
 		if (command != null) {
-			zoot.getServer().dispatchCommand(zoot.getServer().getConsoleSender(), command
+			Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command
 					.replace("{player}", player.getName())
 					.replace("{player-uuid}", player.getUniqueId().toString()));
 		}

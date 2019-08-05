@@ -1,7 +1,6 @@
 package com.minexd.zoot.chat;
 
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.Bootstrapped;
 import com.minexd.zoot.chat.filter.ChatFilter;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.profile.punishment.PunishmentType;
@@ -13,10 +12,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 
-public class Chat extends Bootstrapped {
+public class Chat {
+
+	private Zoot zoot;
 
 	public Chat(Zoot zoot) {
-		super(zoot);
+		this.zoot = zoot;
 	}
 
 	@Getter @Setter private int delayTime = 3;

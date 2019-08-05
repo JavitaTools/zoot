@@ -14,13 +14,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class ProfileListener {
+public class ProfileListener implements Listener {
 
 	private static Zoot plugin = Zoot.get();
 
@@ -95,7 +96,7 @@ public class ProfileListener {
 
 		RedisPlayerData playerData = new RedisPlayerData(event.getUniqueId(), event.getName());
 		playerData.setLastAction(RedisPlayerData.LastAction.JOINING_SERVER);
-		playerData.setLastSeenServer(Quartz.get().getServerId());
+		playerData.setLastSeenServer(Bukkit.getServerId());
 		playerData.setLastSeenAt(System.currentTimeMillis());
 
 		plugin.getRedisCache().updatePlayerData(playerData);
@@ -130,7 +131,7 @@ public class ProfileListener {
 
 		RedisPlayerData playerData = new RedisPlayerData(event.getPlayer().getUniqueId(), event.getPlayer().getName());
 		playerData.setLastAction(RedisPlayerData.LastAction.LEAVING_SERVER);
-		playerData.setLastSeenServer(Quartz.get().getServerId());
+		playerData.setLastSeenServer(Bukkit.getServerId());
 		playerData.setLastSeenAt(System.currentTimeMillis());
 
 		plugin.getRedisCache().updatePlayerData(playerData);
@@ -143,7 +144,7 @@ public class ProfileListener {
 		if (profile.getStaffOptions().staffChatModeEnabled()) {
 			if (profile.getStaffOptions().staffModeEnabled()) {
 				Zoot.get().getPidgin().sendPacket(new PacketStaffChat(
-						ZootAPI.getColoredName(event.getPlayer()), Quartz.get().getServerId(), event.getMessage()));
+						ZootAPI.getColoredName(event.getPlayer()), Bukkit.getServerId(), event.getMessage()));
 			} else {
 				event.getPlayer().sendMessage(CC.RED + "You must enable staff mode or disable staff chat mode.");
 			}

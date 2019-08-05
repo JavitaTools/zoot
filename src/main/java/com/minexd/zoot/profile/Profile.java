@@ -15,22 +15,31 @@ import com.minexd.zoot.profile.grant.Grant;
 import com.minexd.zoot.profile.punishment.PunishmentType;
 import com.minexd.zoot.rank.Rank;
 import com.minexd.zoot.util.Cooldown;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class Profile {
+
+	@Getter private static Map<UUID, Profile> profiles = new HashMap<>();
+	private static MongoCollection<Document> collection = Zoot.get().getMongoDatabase().getCollection("profiles");
 
 	@Getter private final UUID uuid;
 	@Getter @Setter private String name;
@@ -49,9 +58,9 @@ public class Profile {
 	@Getter @Setter private Cooldown chatCooldown;
 	@Getter @Setter private Cooldown requestCooldown;
 
-	public Profile(UUID uuid, String name) {
+	public Profile(String username, UUID uuid) {
 		this.uuid = uuid;
-		this.name = name;
+		this.name = username;
 		this.grants = new ArrayList<>();
 		this.punishments = new ArrayList<>();
 		this.ipAddresses = new ArrayList<>();
@@ -277,6 +286,59 @@ public class Profile {
 		document.put("punishments", punishmentList.toString());
 
 		collection.replaceOne(Filters.eq("uuid", uuid.toString()), document, new ReplaceOptions().upsert(true));
+	}
+
+	public static Profile getByUuid(UUID uuid) {
+		if (profiles.containsKey(uuid)) {
+			return profiles.get(uuid);
+		}
+
+		return new Profile(null, uuid);
+	}
+
+	public static Profile getByUsername(String username) {
+		Player player = Bukkit.getPlayer(username);
+
+		if (player != null) {
+			return profiles.get(player.getUniqueId());
+		}
+
+		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(username);
+
+		if (offlinePlayer.hasPlayedBefore()) {
+			if (profiles.containsKey(offlinePlayer.getUniqueId())) {
+				return profiles.get(offlinePlayer.getUniqueId());
+			}
+
+			return new Profile(offlinePlayer.getName(), offlinePlayer.getUniqueId());
+		}
+
+		UUID uuid = Zoot.get().getRedisCache().getUuid(username);
+
+		if (uuid != null) {
+			if (profiles.containsKey(uuid)) {
+				return profiles.get(uuid);
+			}
+
+			return new Profile(username, uuid);
+		}
+
+		return null;
+	}
+
+	public static List<Profile> getByIpAddress(String ipAddress) {
+		List<Profile> profiles = new ArrayList<>();
+		Bson filter = Filters.eq("currentAddress", ipAddress);
+
+		try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
+			while (cursor.hasNext()) {
+				Document document = cursor.next();
+				profiles.add(new Profile(document.getString("username"),
+						UUID.fromString(document.getString("uuid"))));
+			}
+		}
+
+		return profiles;
 	}
 
 }

@@ -2,29 +2,26 @@ package com.minexd.zoot.chat;
 
 import com.minexd.zoot.Locale;
 import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.BootstrappedListener;
 import com.minexd.zoot.chat.event.ChatAttemptEvent;
 import com.minexd.zoot.profile.Profile;
 import com.minexd.zoot.util.CC;
 import com.minexd.zoot.util.TimeUtil;
 import java.util.function.Predicate;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-public class ChatListener extends BootstrappedListener {
-
-	public ChatListener(Zoot zoot) {
-		super(zoot);
-	}
+public class ChatListener implements Listener {
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event) {
-		ChatAttempt chatAttempt = zoot.getChat().attemptChatMessage(event.getPlayer(), event.getMessage());
+		ChatAttempt chatAttempt = Zoot.get().getChat().attemptChatMessage(event.getPlayer(), event.getMessage());
 		ChatAttemptEvent chatAttemptEvent = new ChatAttemptEvent(event.getPlayer(), chatAttempt, event.getMessage());
 
-		zoot.getServer().getPluginManager().callEvent(chatAttemptEvent);
+		Bukkit.getServer().getPluginManager().callEvent(chatAttemptEvent);
 
 		if (!chatAttemptEvent.isCancelled()) {
 			switch (chatAttempt.getResponse()) {

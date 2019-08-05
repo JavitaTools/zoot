@@ -1,7 +1,5 @@
 package com.minexd.zoot.profile.punishment.listener;
 
-import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.BootstrappedListener;
 import com.minexd.zoot.profile.punishment.procedure.PunishmentProcedure;
 import com.minexd.zoot.profile.punishment.procedure.PunishmentProcedureStage;
 import com.minexd.zoot.profile.punishment.procedure.PunishmentProcedureType;
@@ -11,13 +9,10 @@ import com.minexd.zoot.util.menu.menus.ConfirmMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-public class PunishmentListener extends BootstrappedListener {
-
-	public PunishmentListener(Zoot zoot) {
-		super(zoot);
-	}
+public class PunishmentListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event) {

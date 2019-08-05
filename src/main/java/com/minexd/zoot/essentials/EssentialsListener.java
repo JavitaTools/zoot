@@ -1,16 +1,15 @@
 package com.minexd.zoot.essentials;
 
-import com.minexd.zoot.Zoot;
-import com.minexd.zoot.bootstrap.BootstrappedListener;
 import com.minexd.zoot.util.CC;
 import java.util.Arrays;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-public class EssentialsListener extends BootstrappedListener {
+public class EssentialsListener implements Listener {
 
 	private static List<String> BLOCKED_COMMANDS = Arrays.asList(
 			"//calc",
@@ -24,10 +23,6 @@ public class EssentialsListener extends BootstrappedListener {
 			"/version",
 			"/ver"
 	);
-
-	public EssentialsListener(Zoot zoot) {
-		super(zoot);
-	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onCommandProcess(PlayerCommandPreprocessEvent event) {
