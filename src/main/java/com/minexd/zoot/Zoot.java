@@ -88,8 +88,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import net.evilblock.restrix.api.JavaPluginProxy;
-import net.evilblock.restrix.api.RestrixPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -97,7 +95,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class Zoot extends RestrixPlugin {
+public class Zoot extends JavaPlugin {
 
 	public static final Gson GSON = new Gson();
 	public static final Type LIST_STRING_TYPE = new TypeToken<List<String>>() {}.getType();
@@ -121,10 +119,8 @@ public class Zoot extends RestrixPlugin {
 	@Override
 	public void onEnable() {
 		zoot = this;
-
-		JavaPlugin proxy = JavaPluginProxy.getProxy(this);
-
-		mainConfig = new BasicConfigurationFile(proxy, "config");
+		
+		mainConfig = new BasicConfigurationFile(this, "config");
 
 		new ConfigValidation(mainConfig.getFile(), mainConfig.getConfiguration(), 4).check();
 
@@ -135,7 +131,7 @@ public class Zoot extends RestrixPlugin {
 		essentials = new Essentials(this);
 		chat = new Chat(this);
 
-		honcho = new Honcho(proxy);
+		honcho = new Honcho(this);
 
 		Arrays.asList(
 				new BroadcastCommand(),

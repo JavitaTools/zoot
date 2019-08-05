@@ -93,12 +93,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.evilblock.restrix</groupId>
-            <artifactId>plugin-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.minexd</groupId>
             <artifactId>helper</artifactId>
             <version>1.0-SNAPSHOT</version>
