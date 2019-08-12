@@ -2,7 +2,6 @@ package com.minexd.zoot.cache;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.minexd.helper.util.Log;
 import com.minexd.zoot.Zoot;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +33,7 @@ public class RedisCache {
 				return UUID.fromString(uuid);
 			}
 		} catch (Exception e) {
-			Log.info("Could not connect to redis");
+			Bukkit.getLogger().info("Could not connect to redis");
 			e.printStackTrace();
 		}
 
@@ -46,7 +45,7 @@ public class RedisCache {
 				return uuid;
 			}
 		} catch (Exception e) {
-			Log.info("Could not fetch from Mojang API");
+			Bukkit.getLogger().info("Could not fetch from Mojang API");
 			e.printStackTrace();
 		}
 

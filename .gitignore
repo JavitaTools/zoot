@@ -56,7 +56,6 @@ libraries/*.jar
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
